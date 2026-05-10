@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Browse all ShopWave products — Electronics, Clothing, Books, Home, Sports, Beauty." />
+  <title>Products – ShopWave</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .products-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+      padding: 2rem 0 4rem;
+    }
+
+    /* ── Sidebar Filters ── */
+    .sidebar {
+      position: sticky;
+      top: calc(var(--navbar-h) + 1rem);
+      height: fit-content;
+    }
+
+    .filter-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .filter-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .filter-group { margin-bottom: 1.5rem; }
+    .filter-group:last-child { margin-bottom: 0; }
+
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.45rem 0.6rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .filter-option:hover   { background: var(--bg-glass); color: var(--text-primary); }
+    .filter-option.active  { background: rgba(108,99,255,0.15); color: var(--accent-light); font-weight: 600; }
+
+    .filter-option .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── Products Area ── */
+    .products-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .results-info { color: var(--text-secondary); font-size: 0.9rem; }
+    .results-info strong { color: var(--text-primary); }
+
+    .sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sort-wrap label { font-size: 0.85rem; color: var(--text-muted); }
+
+    .search-bar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-bar .form-control { flex: 1; }
+
+    /* ── Products Grid ── */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .product-img-wrap { position: relative; overflow: hidden; }
+    .product-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .product-card:hover .product-img { transform: scale(1.06); }
+
+    .product-category {
+      position: absolute; top: 0.65rem; left: 0.65rem;
+      padding: 0.2rem 0.6rem;
+      background: rgba(10,10,15,0.85);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.68rem; font-weight: 600;
+      color: var(--accent-light);
+      backdrop-filter: blur(8px);
+    }
+
+    .product-body { padding: 1rem; flex: 1; }
+    .product-name { font-weight: 700; font-size: 0.9rem; line-height: 1.4; margin-bottom: 0.4rem; }
+    .product-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .product-footer {
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .product-price { font-size: 1.1rem; font-weight: 800; color: var(--accent-light); }
+    .product-rating { font-size: 0.72rem; color: var(--text-muted); text-align: right; }
+
+    .add-btn {
+      width: 100%;
+      padding: 0.55rem;
+      margin: 0.5rem 1rem;
+      width: calc(100% - 2rem);
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .add-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--accent-glow); }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 2.5rem;
+    }
+
+    .page-btn {
+      min-width: 40px; height: 40px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .page-btn:hover   { border-color: var(--border-hover); color: var(--text-primary); }
+    .page-btn.active  { background: var(--accent); border-color: var(--accent); color: white; }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    @media (max-width: 900px) {
+      .products-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-brand">🛍️ ShopWave</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart</a>
+  </div>
+  <div class="nav-actions">
+    <a href="cart.html" class="cart-btn" id="cart-link">
+      🛒 Cart
+      <span class="cart-count" id="cart-count" style="display:none">0</span>
+    </a>
+    <div id="nav-user-zone"></div>
+  </div>
+</nav>
+
+<main class="main-content">
+  <div class="container">
+    <div class="page-header">
+      <h1>All Products</h1>
+      <p>Browse our full catalogue — filtered, sorted, and fast</p>
+    </div>
+
+    <div class="products-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="filter-card">
+          <div class="filter-group">
+            <h3>Category</h3>
+            <button class="filter-option active" id="cat-all" onclick="setCategory('All', this)"><span class="dot"></span>All Categories</button>
+            <button class="filter-option" id="cat-electronics" onclick="setCategory('Electronics', this)"><span class="dot"></span>💻 Electronics</button>
+            <button class="filter-option" id="cat-clothing"    onclick="setCategory('Clothing', this)"><span class="dot"></span>👗 Clothing</button>
+            <button class="filter-option" id="cat-books"       onclick="setCategory('Books', this)"><span class="dot"></span>📚 Books</button>
+            <button class="filter-option" id="cat-home"        onclick="setCategory('Home', this)"><span class="dot"></span>🏠 Home</button>
+            <button class="filter-option" id="cat-sports"      onclick="setCategory('Sports', this)"><span class="dot"></span>🏋️ Sports</button>
+            <button class="filter-option" id="cat-beauty"      onclick="setCategory('Beauty', this)"><span class="dot"></span>💄 Beauty</button>
+          </div>
+
+          <div class="filter-group">
+            <h3>Sort By</h3>
+            <select class="form-control" id="sort-select" onchange="applySort(this.value)">
+              <option value="">Newest First</option>
+              <option value="price_asc">Price: Low → High</option>
+              <option value="price_desc">Price: High → Low</option>
+              <option value="rating">Top Rated</option>
+            </select>
+          </div>
+
+          <button class="btn btn-secondary btn-full btn-sm" onclick="resetFilters()" id="reset-btn">Reset Filters</button>
+        </div>
+      </aside>
+
+      <!-- Main Products Area -->
+      <div>
+        <div class="search-bar">
+          <input type="text" class="form-control" id="search-input" placeholder="🔍 Search products…" />
+          <button class="btn btn-primary btn-sm" onclick="doSearch()" id="search-btn">Search</button>
+        </div>
+
+        <div class="products-header">
+          <p class="results-info" id="results-info">Loading…</p>
+        </div>
+
+        <div class="products-grid" id="products-grid">
+          <div class="loading-overlay" style="grid-column:1/-1"><div class="spinner"></div><p>Loading products…</p></div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2025 <span>ShopWave</span> · Built with Node.js + MongoDB + AWS · College Project</p>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+  let state = { category: 'All', sort: '', search: '', page: 1 };
+
+  // Check for ?cat= URL param
+  const urlCat = new URLSearchParams(window.location.search).get('cat');
+  if (urlCat) {
+    state.category = urlCat;
+    document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('cat-' + urlCat.toLowerCase());
+    if (btn) btn.classList.add('active');
+  }
+
+  async function loadProducts() {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = '<div class="loading-overlay" style="grid-column:1/-1"><div class="spinner"></div><p>Loading…</p></div>';
+
+    const params = new URLSearchParams({
+      page: state.page,
+      limit: 12,
+      ...(state.category !== 'All' && { category: state.category }),
+      ...(state.sort && { sort: state.sort }),
+      ...(state.search && { search: state.search }),
+    });
+
+    const { ok, data } = await apiRequest(`/products?${params}`);
+
+    if (!ok || !data.products) {
+      grid.innerHTML = '<p style="color:var(--text-muted);padding:2rem;grid-column:1/-1">Failed to load products. Is the backend running?</p>';
+      return;
+    }
+
+    document.getElementById('results-info').innerHTML =
+      `Showing <strong>${data.products.length}</strong> of <strong>${data.total}</strong> products`;
+
+    if (data.products.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-icon">🔍</div>
+          <h3>No products found</h3>
+          <p>Try adjusting your filters or search term.</p>
+          <button class="btn btn-secondary" onclick="resetFilters()" id="empty-reset-btn">Reset Filters</button>
+        </div>`;
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    grid.innerHTML = data.products.map(p => `
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img class="product-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/240x200?text=Product'" />
+          <span class="product-category">${p.category}</span>
+        </div>
+        <div class="product-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.description}</div>
+        </div>
+        <div class="product-footer">
+          <span class="product-price">${formatPrice(p.price)}</span>
+          <span class="product-rating"><span class="stars">${renderStars(p.rating)}</span><br>${p.rating} (${p.reviews})</span>
+        </div>
+        <button class="add-btn" onclick="addToCart(${p.id}, 1, this)" id="add-${p.id}">🛒 Add to Cart</button>
+      </div>
+    `).join('');
+
+    renderPagination(data.page, data.pages);
+  }
+
+  function renderPagination(current, total) {
+    const el = document.getElementById('pagination');
+    if (total <= 1) { el.innerHTML = ''; return; }
+
+    let html = `<button class="page-btn" onclick="goPage(${current - 1})" ${current === 1 ? 'disabled' : ''} id="prev-btn">‹</button>`;
+    for (let i = 1; i <= total; i++) {
+      html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="goPage(${i})" id="page-${i}">${i}</button>`;
+    }
+    html += `<button class="page-btn" onclick="goPage(${current + 1})" ${current === total ? 'disabled' : ''} id="next-btn">›</button>`;
+    el.innerHTML = html;
+  }
+
+  function goPage(p)        { state.page = p; loadProducts(); window.scrollTo(0, 0); }
+  function setCategory(c, btn) {
+    state.category = c; state.page = 1;
+    document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadProducts();
+  }
+  function applySort(s)     { state.sort = s; state.page = 1; loadProducts(); }
+  function doSearch()       { state.search = document.getElementById('search-input').value.trim(); state.page = 1; loadProducts(); }
+  function resetFilters()   {
+    state = { category: 'All', sort: '', search: '', page: 1 };
+    document.getElementById('search-input').value = '';
+    document.getElementById('sort-select').value = '';
+    document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('active'));
+    document.getElementById('cat-all').classList.add('active');
+    loadProducts();
+  }
+
+  document.getElementById('search-input').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+  loadProducts();
+</script>
+
+</body>
+</html>
